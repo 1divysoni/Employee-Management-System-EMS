@@ -1,1 +1,210 @@
-# Employee-Management-System-EMS-
+1. main.py
+This script serves as the main entry point for the Employee Management System (EMS). It handles user interactions, commands, and coordinates between different modules to manage employee data.
+
+Key Components:
+
+Imports:
+
+datetime: To handle date and time operations.
+Operations: Custom module containing core functionalities like adding, updating, retrieving, and deleting employee records.
+GenerateReports: Custom module for generating various employee reports.
+ANSI_codes: Custom module for text formatting in the terminal using ANSI escape codes.
+Main Logic:
+
+The script starts by welcoming the user with a styled message using ANSI codes.
+Data_file_path: The path to the CSV file containing employee data.
+A while loop to continuously prompt the user to select a command to execute.
+Commands:
+Add Employee: Prompts the user for employee details, generates a new employee ID, and adds the employee to the CSV file.
+Update Employee: Allows updating specific employee details based on the provided employee ID.
+Get Record Of Employee: Retrieves and displays the details of an employee based on the provided ID.
+Delete Employee: Deletes an employee record based on the provided ID.
+Generate Employee Report: Invokes the report generation module to create various reports.
+Exit: Terminates the program.
+Example Code Snippets:
+
+python
+Copy code
+# Adding a new employee
+if command == 1:
+    Id = generate_employee_id(Data_file_path)
+    # Prompting for employee details...
+    if new_employee(Data_file_path, Id, Emp_Name, Emp_Age, Emp_Department, Emp_Position, Emp_Salary, Emp_Hire_Date):
+        print(f'{Text.GREEN}Employee Added Successfully. ID={Id}, Name={Emp_Name}{Text.RESET}')
+    else:
+        print(f'{Text.RED}Error{Text.RESET}')
+2. GenerateReports.py
+This script handles the generation of various reports based on employee data.
+
+Key Components:
+
+Imports:
+
+pandas as pd: For data manipulation and analysis.
+ANSI_codes: For text formatting.
+time: For adding delays.
+Pdf_Maker: Custom module to convert CSV data to PDF.
+Functions:
+
+list_all_employees(df): Returns all employee records.
+list_employees_by_department(df, department): Returns employees in a specified department.
+average_salary_by_department(df): Calculates and returns the average salary by department.
+employees_hired_within_date_range(df, start_date, end_date): Returns employees hired within a specified date range.
+top_n_highest_paid_employees(df): Returns the top highest-paid employees.
+Main Logic:
+
+The main function reads the employee data from the CSV file and prompts the user to select a report to generate.
+Each report option generates the corresponding report and optionally saves it as a PDF.
+Example Code Snippets:
+
+python
+Copy code
+# Generating a report of all employees
+if command == 1:
+    print(f'{Text.BLUE}All Employees:{Text.RESET}')
+    Case1 = list_all_employees(df)
+    print(Case1)
+    if check == 'Y':
+        create_pdf_from_csv(Case1, 'All Employees Data.pdf', title="All Employees Data")
+3. Operations.py
+This module contains core functions for managing employee data.
+
+Key Components:
+
+Functions:
+new_employee(file_path, emp_id, name, age, department, position, salary, hire_date): Adds a new employee to the CSV file.
+delete_employee(file_path, emp_id): Deletes an employee record based on the provided ID.
+get_employee_data(file_path, emp_id): Retrieves employee details based on the provided ID.
+update_employee(file_path, emp_id, column_name, update_content): Updates specific employee details based on the provided ID and column name.
+generate_employee_id(file_path, length=10): Generates a unique employee ID.
+department_position(): Prompts the user to select a department and position for an employee.
+Example Code Snippets:
+
+python
+Copy code
+# Adding a new employee
+def new_employee(file_path, emp_id, name, age, department, position, salary, hire_date):
+    try:
+        df = pd.read_csv(file_path)
+        new_row = pd.DataFrame({'Employee_ID': [emp_id], 'Name': [name], 'Age': [age], 'Department': [department], 'Position': [position], 'Salary': [salary], 'Hire_Date': [hire_date]})
+        df = pd.concat([df, new_row], ignore_index=True)
+        df.to_csv(file_path, index=False)
+        return True
+    except Exception as e:
+        return e
+4. ANSI_codes.py
+This module contains ANSI escape codes for text formatting in the terminal.
+
+Key Components:
+
+Text Styles:
+
+ITALIC_START, ITALIC_END: For italic text.
+BOLD: For bold text.
+UNDERLINE: For underlined text.
+Text Colors:
+
+RESET: Resets text formatting.
+RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE: For colored text.
+
+PDF report from a filtered DataFrame using ReportLab:
+
+Import Statements
+Importing Page Sizes and Colors
+
+python
+Copy code
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib import colors
+letter: Represents the standard US letter size (8.5x11 inches).
+landscape: Rotates the page to landscape orientation.
+colors: Provides a collection of color constants to be used in the PDF.
+Importing Styles and Platypus (Page Layout and Typography Using Scripts) Components
+
+python
+Copy code
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+getSampleStyleSheet: Retrieves a sample stylesheet for consistent text styles.
+SimpleDocTemplate: A high-level class for creating PDF documents.
+Table: Used to create tables in the PDF.
+TableStyle: Defines the styling of the table.
+Paragraph: Used to create text paragraphs with specific styles.
+Spacer: Inserts vertical space between elements.
+Function: create_pdf_from_csv
+This function takes a filtered DataFrame and generates a PDF report.
+
+Parameters:
+filtered_df: The DataFrame containing the data to be included in the PDF.
+pdf_file: The name of the output PDF file.
+title: The title of the PDF report (default is "Report").
+Steps:
+Initialize PDF Document
+
+python
+Copy code
+pdf = SimpleDocTemplate(pdf_file, pagesize=landscape(letter))
+Creates a PDF document in landscape orientation.
+Prepare Elements for the PDF
+
+python
+Copy code
+elements = []
+styles = getSampleStyleSheet()
+title_style = styles['Title']
+heading = Paragraph(title, title_style)
+elements.append(heading)
+elements.append(Spacer(1, 12))
+Initializes an empty list elements to hold PDF components.
+Retrieves the sample stylesheet and sets the title style.
+Creates a title paragraph and adds it to elements along with a spacer.
+Convert DataFrame to Table Data
+
+python
+Copy code
+data = [filtered_df.columns.tolist()] + filtered_df.values.tolist()
+Converts the DataFrame into a list of lists, with the first row containing column headers.
+Create and Style the Table
+
+python
+Copy code
+table = Table(data)
+style = TableStyle([
+    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+    ('FONTSIZE', (0, 0), (-1, 0), 12),
+    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+])
+table.setStyle(style)
+elements.append(table)
+Creates a Table object with the data.
+Defines a TableStyle with various styling attributes:
+Header background in grey and text color in white.
+Alignment, font, and size settings.
+Background color for data rows in beige.
+Grid lines in black.
+Applies the style to the table and adds the table to elements.
+Build the PDF
+
+python
+Copy code
+pdf.build(elements)
+Builds the PDF document with the specified elements.
+Main Block
+python
+Copy code
+if __name__ == "__main__":
+    pass
+This block is a placeholder for code execution when running the script directly. Currently, it does nothing but can be expanded to test or run the function.
+Summary
+The code defines a function to create a PDF report from a DataFrame, styling the table and adding a title. It uses ReportLab's high-level SimpleDocTemplate, Table, and Paragraph classes to structure and style the PDF elements effectively.
+
+
+
+
+
+
